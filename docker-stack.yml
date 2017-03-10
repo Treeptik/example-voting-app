@@ -8,6 +8,8 @@ services:
     networks:
       - frontend
     deploy:
+      placement:
+        constraints: [node.role != manager]
       replicas: 2
       update_config:
         parallelism: 2
@@ -22,7 +24,7 @@ services:
       - backend
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints: [node.role != manager]
   vote:
     image: dockersamples/examplevotingapp_vote:before
     ports:
@@ -32,9 +34,12 @@ services:
     depends_on:
       - redis
     deploy:
+      placement:
+        constraints: [node.role != manager]
       replicas: 2
       update_config:
-        parallelism: 2
+        parallelism: 1
+        delay: 10s
       restart_policy:
         condition: on-failure
   result:
@@ -46,6 +51,8 @@ services:
     depends_on:
       - db
     deploy:
+      placement:
+        constraints: [node.role != manager]
       replicas: 1
       update_config:
         parallelism: 2
@@ -59,6 +66,8 @@ services:
       - frontend
       - backend
     deploy:
+      placement:
+        constraints: [node.role != manager]
       mode: replicated
       replicas: 1
       labels: [APP=VOTING]
@@ -67,8 +76,6 @@ services:
         delay: 10s
         max_attempts: 3
         window: 120s
-      placement:
-        constraints: [node.role == manager]
 
   visualizer:
     image: dockersamples/visualizer:stable
